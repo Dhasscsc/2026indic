@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Target Live - Absolute Gain Report</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, Roboto, sans-serif;
+            background: #eef3fc;
+            padding: 20px;
+            color: #0c2e42;
+        }
+
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.12);
+            padding: 1.5rem 1.8rem 2.2rem;
+            transition: all 0.2s;
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            margin: 0 0 6px;
+            background: linear-gradient(130deg, #0a3b4f, #1e7ea2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+
+        .sub {
+            color: #2c5a74;
+            border-left: 4px solid #2c9cd4;
+            padding-left: 14px;
+            margin: 8px 0 24px;
+            font-weight: 450;
+        }
+
+        /* stats row */
+        .stats-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: #f6fafd;
+            border-radius: 2rem;
+            padding: 16px 28px;
+            flex: 1;
+            min-width: 140px;
+            text-align: center;
+            border: 1px solid #dee9f0;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        .stat-number {
+            font-size: 2.3rem;
+            font-weight: 800;
+            color: #1a6d8f;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            color: #426f8c;
+        }
+
+        /* daily report panel */
+        .daily-report-panel {
+            background: linear-gradient(115deg, #fef9e8 0%, #fff6e6 100%);
+            border-radius: 28px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 24px;
+            border: 1px solid #ffe2b5;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .report-title {
+            font-weight: 800;
+            font-size: 1.1rem;
+            background: #cc7b2e20;
+            padding: 6px 18px;
+            border-radius: 40px;
+            color: #a55317;
+        }
+
+        .report-stats-mini {
+            display: flex;
+            gap: 18px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .report-stats-mini span {
+            background: white;
+            padding: 5px 14px;
+            border-radius: 30px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* toolbar */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            background: #f9fbfe;
+            padding: 12px 20px;
+            border-radius: 60px;
+            margin-bottom: 24px;
+            border: 1px solid #e2edf5;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            background: white;
+            padding: 4px 10px;
+            border-radius: 40px;
+            border: 1px solid #cfdfed;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: none;
+            padding: 6px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: #2c6282;
+            transition: 0.1s;
+        }
+
+        .filter-btn.active {
+            background: #1a6d4e;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-box {
+            flex: 2;
+            min-width: 220px;
+            background: white;
+            border: 1px solid #cfdfed;
+            border-radius: 40px;
+            padding: 8px 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-box input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 0.85rem;
+            background: transparent;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            background: white;
+            border: 1px solid #cbdde9;
+            font-size: 0.8rem;
+            transition: 0.1s;
+        }
+
+        .btn-primary {
+            background: #075e54;
+            color: white;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: #1e4663;
+            color: white;
+            border: none;
+        }
+
+        .upload-area {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .status-badge {
+            font-size: 0.7rem;
+            background: #eef2f7;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-weight: 500;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 24px;
+            border: 1px solid #e6edf4;
+            max-height: 62vh;
+            overflow-y: auto;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.73rem;
+            min-width: 1200px;
+        }
+
+        th {
+            background: #eef2f8;
+            padding: 12px 10px;
+            text-align: right;
+            font-weight: 800;
+            position: sticky;
+            top: 0;
+            cursor: pointer;
+            z-index: 10;
+            border-bottom: 1px solid #d0dee9;
+            color: #1a485f;
+        }
+
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #edf2f7;
+            text-align: right;
+            transition: background 0.1s;
+        }
+
+        /* Colorful rows based on signal */
+        tr.buy-row {
+            background-color: #e6f9ef;
+        }
+
+        tr.sell-row {
+            background-color: #ffe9ec;
+        }
+
+        tr.wait-row {
+            background-color: #fefef7;
+        }
+
+        tr.buy-row:hover {
+            background-color: #d0f0df;
+        }
+
+        tr.sell-row:hover {
+            background-color: #ffdbdf;
+        }
+
+        tr.wait-row:hover {
+            background-color: #f6f9fc;
+        }
+
+        .stock-name {
+            text-align: left;
+            font-weight: 700;
+            color: #0f4c6b;
+        }
+
+        /* GAIN column number styling - absolute values without % */
+        .positive-number {
+            color: #0f7b3a;
+            font-weight: 700;
+            background: #e0f3e6;
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .negative-number {
+            color: #c23b22;
+            font-weight: 700;
+            background: #ffe1dc;
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .buy-badge {
+            background: #138c4e;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 24px;
+            font-weight: 700;
+            display: inline-block;
+            font-size: 0.7rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .sell-badge {
+            background: #c7362b;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 24px;
+            font-weight: 700;
+        }
+
+        .wait-badge {
+            background: #7f8c8d30;
+            color: #2c3e4e;
+            padding: 4px 12px;
+            border-radius: 24px;
+            font-weight: 600;
+        }
+
+        .checkbox-col {
+            text-align: center;
+            width: 32px;
+        }
+
+        .report-info-bar {
+            background: #e2f0f9;
+            border-radius: 20px;
+            padding: 8px 20px;
+            margin-bottom: 18px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            align-items: center;
+            font-size: 0.75rem;
+        }
+
+        .small-btn {
+            background: white;
+            border: 1px solid #b8d0e0;
+            padding: 4px 14px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+
+        @media print {
+            .toolbar,
+            .action-buttons,
+            .upload-area,
+            .filter-group,
+            .stats-row,
+            .report-info-bar,
+            .daily-report-panel {
+                display: none;
+            }
+
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .table-wrapper {
+                max-height: none;
+                overflow: visible;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <h1>📊 TARGET LIVE · ABSOLUTE GAIN DASHBOARD</h1>
+    <div class="sub">Daily report · GAIN as absolute value (not %) · Color-rich rows</div>
+
+    <!-- Daily Report Section -->
+    <div class="daily-report-panel" id="dailyReportPanel">
+        <div class="report-title">📅 TODAY'S TRADE REPORT</div>
+        <div class="report-stats-mini" id="dailyStatsMini">
+            <span>📈 BUY: <strong id="miniBuy">0</strong></span>
+            <span>📉 SELL: <strong id="miniSell">0</strong></span>
+            <span>📊 TOTAL: <strong id="miniTotal">0</strong></span>
+            <span>🎯 SIGNAL ACTIVE: <strong id="miniSignalRatio">-</strong></span>
+        </div>
+        <div style="font-size:0.7rem; color:#af6e2e;">✔️ Select rows & share via WhatsApp | GAIN = absolute number</div>
+    </div>
+
+    <div class="report-info-bar" id="reportInfoBar" style="display: none;">
+        <span>📅 <span id="reportDateLabel">No saved report</span></span>
+        <div style="display: flex; gap: 8px;">
+            <button class="small-btn" id="loadLastBtn">📂 Load last report</button>
+            <button class="small-btn" id="clearSavedBtn">🗑️ Clear saved</button>
+        </div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-number" id="totalStocks">0</div>
+            <div class="stat-label">Total stocks</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="buyCount">0</div>
+            <div class="stat-label">BUY signals</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="sellCount">0</div>
+            <div class="stat-label">SELL signals</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="filter-group">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="BUY">BUY 🔵</button>
+            <button class="filter-btn" data-filter="SELL">SELL 🔴</button>
+        </div>
+        <div class="search-box">🔍 <input type="text" id="searchInput" placeholder="Search stock name..."></div>
+        <div class="action-buttons">
+            <button class="btn btn-primary" id="shareWhatsAppBtn">📱 Share on WhatsApp</button>
+            <button class="btn btn-secondary" id="printBtn">🖨️ Print report</button>
+        </div>
+        <div class="upload-area">
+            <button class="btn" id="uploadCsvBtn">📂 Upload CSV</button>
+            <span class="status-badge" id="statusMsg">Ready</span>
+        </div>
+    </div>
+
+    <div class="table-wrapper" id="tableContainer">
+        <div style="padding: 50px; text-align: center; color: #54708f;">📁 Upload CSV file or load last session</div>
+    </div>
+</div>
+
+<script>
+    // ---------- GLOBALS ----------
+    let headers = [];
+    let rows = [];
+    let currentFilter = "all";
+    let currentSearch = "";
+    let sortColumn = null;
+    let sortDirection = "asc";
+
+    let stockIdx = -1;
+    let buyIdx = -1;
+    let sellIdx = -1;
+    let gainIdx = -1;      // GAIN column as absolute number (no %)
+
+    const STORAGE_KEY = 'targetLiveReportV4';
+    const STORAGE_DATE_KEY = 'targetLiveReportDateV4';
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.csv';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+
+    function getSignalFromRow(row) {
+        let buyVal = (buyIdx !== -1 && row[buyIdx]) ? row[buyIdx].toUpperCase().trim() : '';
+        let sellVal = (sellIdx !== -1 && row[sellIdx]) ? row[sellIdx].toUpperCase().trim() : '';
+        if (buyVal === 'BUY') return 'BUY';
+        if (sellVal === 'SELL') return 'SELL';
+        return 'WAIT';
+    }
+
+    function updateIndexes() {
+        stockIdx = headers.findIndex(h => h && h.toUpperCase() === 'STOCK');
+        buyIdx = headers.findIndex(h => h && h.toUpperCase() === 'BUY');
+        sellIdx = headers.findIndex(h => h && h.toUpperCase() === 'SELL');
+        // GAIN column (absolute value, not percentage)
+        gainIdx = headers.findIndex(h => h && h.toUpperCase() === 'GAIN');
+        // fallback if GAIN not found, try to find any numeric gain column
+        if (gainIdx === -1) {
+            gainIdx = headers.findIndex(h => h && (h.toUpperCase() === 'P CNG' || h.toUpperCase() === '%CHG' || h.includes('CHG')));
+        }
+        if (stockIdx === -1) {
+            stockIdx = headers.findIndex(h => h && h.toUpperCase().includes('STOCK'));
+        }
+    }
+
+    function parseCSV(text) {
+        const rowsData = [];
+        const lines = text.split(/\r?\n/);
+        for (let line of lines) {
+            line = line.trim();
+            if (line === "") continue;
+            const row = [];
+            let inQuote = false;
+            let current = '';
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (ch === '"') {
+                    inQuote = !inQuote;
+                } else if (ch === ',' && !inQuote) {
+                    row.push(current.trim());
+                    current = '';
+                } else {
+                    current += ch;
+                }
+            }
+            row.push(current.trim());
+            row.forEach((cell, idx) => {
+                if (cell.startsWith('"') && cell.endsWith('"')) row[idx] = cell.slice(1, -1);
+            });
+            rowsData.push(row);
+        }
+        return rowsData;
+    }
+
+    function loadCSV(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const csvRows = parseCSV(e.target.result);
+            if (csvRows.length < 1) {
+                document.getElementById('statusMsg').innerHTML = '❌ Empty CSV';
+                return;
+            }
+            headers = csvRows[0];
+            rows = csvRows.slice(1);
+            rows = rows.filter(row => row.length >= 2 && row.some(cell => cell && cell.trim() !== ""));
+            updateIndexes();
+            currentFilter = "all";
+            currentSearch = "";
+            sortColumn = null;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+            document.getElementById('searchInput').value = '';
+            renderDashboard();
+            saveReportToStorage();
+            document.getElementById('statusMsg').innerHTML = `✅ ${rows.length} stocks loaded (GAIN = absolute)`;
+        };
+        reader.onerror = () => { alert('File read error'); };
+        reader.readAsText(file, 'UTF-8');
+    }
+
+    function saveReportToStorage() {
+        if (!headers.length || !rows.length) return;
+        const report = {
+            headers: headers,
+            rows: rows,
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(report));
+        localStorage.setItem(STORAGE_DATE_KEY, new Date().toLocaleString());
+        const dateSpan = document.getElementById('reportDateLabel');
+        if (dateSpan) dateSpan.innerText = `Last saved: ${new Date().toLocaleString()}`;
+        document.getElementById('reportInfoBar').style.display = 'flex';
+    }
+
+    function loadReportFromStorage() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) {
+            document.getElementById('statusMsg').innerHTML = 'ℹ️ No saved report found';
+            return false;
+        }
+        try {
+            const data = JSON.parse(saved);
+            headers = data.headers;
+            rows = data.rows;
+            updateIndexes();
+            currentFilter = "all";
+            currentSearch = "";
+            sortColumn = null;
+            document.getElementById('searchInput').value = '';
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+            renderDashboard();
+            const savedDate = localStorage.getItem(STORAGE_DATE_KEY) || 'previous session';
+            document.getElementById('reportDateLabel').innerText = `Report from: ${savedDate}`;
+            document.getElementById('reportInfoBar').style.display = 'flex';
+            document.getElementById('statusMsg').innerHTML = `📂 Loaded ${rows.length} stocks`;
+            return true;
+        } catch (e) {
+            console.warn(e);
+            return false;
+        }
+    }
+
+    function clearSavedReport() {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(STORAGE_DATE_KEY);
+        document.getElementById('reportInfoBar').style.display = 'none';
+        document.getElementById('statusMsg').innerHTML = '🗑️ Saved report cleared';
+        if (headers.length === 0 || rows.length === 0) {
+            document.getElementById('tableContainer').innerHTML = `<div style="padding:50px;text-align:center;">📭 No data. Upload CSV or load last report.</div>`;
+            document.getElementById('totalStocks').innerText = "0";
+            document.getElementById('buyCount').innerText = "0";
+            document.getElementById('sellCount').innerText = "0";
+            updateDailyReportStats(0, 0, 0);
+        } else {
+            renderDashboard();
+        }
+    }
+
+    function getFilteredSortedRows() {
+        let filtered = [...rows];
+        if (currentFilter !== "all") {
+            filtered = filtered.filter(row => getSignalFromRow(row) === currentFilter);
+        }
+        if (currentSearch.trim()) {
+            const searchLower = currentSearch.toLowerCase();
+            filtered = filtered.filter(row => {
+                const stockName = (stockIdx !== -1 && row[stockIdx]) ? row[stockIdx].toLowerCase() : '';
+                return stockName.includes(searchLower);
+            });
+        }
+        if (sortColumn !== null && sortColumn >= 0 && sortColumn < headers.length) {
+            filtered.sort((a, b) => {
+                let aVal = a[sortColumn] || "";
+                let bVal = b[sortColumn] || "";
+                let aNum = parseFloat(aVal);
+                let bNum = parseFloat(bVal);
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return sortDirection === "asc" ? aNum - bNum : bNum - aNum;
+                }
+                return sortDirection === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+            });
+        }
+        return filtered;
+    }
+
+    function updateDailyReportStats(buyTotal, sellTotal, totalStocks) {
+        document.getElementById('miniBuy').innerText = buyTotal;
+        document.getElementById('miniSell').innerText = sellTotal;
+        document.getElementById('miniTotal').innerText = totalStocks;
+        let ratioText = (buyTotal + sellTotal) > 0 ? `⚡ ${buyTotal} / ${sellTotal}` : '—';
+        document.getElementById('miniSignalRatio').innerText = ratioText;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+    }
+
+    function renderDashboard() {
+        if (!headers.length || !rows.length) {
+            document.getElementById('tableContainer').innerHTML = `<div style="padding:50px;text-align:center;">📭 No data. Upload CSV or load last report.</div>`;
+            document.getElementById('totalStocks').innerText = "0";
+            document.getElementById('buyCount').innerText = "0";
+            document.getElementById('sellCount').innerText = "0";
+            updateDailyReportStats(0, 0, 0);
+            return;
+        }
+
+        let buyTotal = 0, sellTotal = 0;
+        for (let row of rows) {
+            const sig = getSignalFromRow(row);
+            if (sig === 'BUY') buyTotal++;
+            else if (sig === 'SELL') sellTotal++;
+        }
+        document.getElementById('totalStocks').innerText = rows.length;
+        document.getElementById('buyCount').innerText = buyTotal;
+        document.getElementById('sellCount').innerText = sellTotal;
+        updateDailyReportStats(buyTotal, sellTotal, rows.length);
+
+        const filtered = getFilteredSortedRows();
+        let html = `<table><thead><tr>
+            <th class="checkbox-col">✔️</th>
+            <th>SIGNAL</th>`;
+        for (let i = 0; i < headers.length; i++) {
+            let icon = (sortColumn === i) ? (sortDirection === 'asc' ? ' 🔼' : ' 🔽') : '';
+            html += `<th onclick="window.sortTableCol(${i})">${escapeHtml(headers[i])}${icon}</th>`;
+        }
+        html += `</tr></thead><tbody>`;
+
+        for (let row of filtered) {
+            let signal = getSignalFromRow(row);
+            let rowClass = (signal === 'BUY') ? 'buy-row' : (signal === 'SELL') ? 'sell-row' : 'wait-row';
+            let badgeClass = (signal === 'BUY') ? 'buy-badge' : (signal === 'SELL') ? 'sell-badge' : 'wait-badge';
+            let badgeHtml = `<span class="${badgeClass}">${signal}</span>`;
+            let stockNameForCheck = (stockIdx !== -1 && row[stockIdx]) ? row[stockIdx] : '';
+
+            html += `<tr class="${rowClass}">`;
+            html += `<td class="checkbox-col"><input type="checkbox" class="stock-checkbox" data-stockname="${escapeHtml(stockNameForCheck)}" data-signal="${signal}"></td>`;
+            html += `<td style="text-align:center">${badgeHtml}</td>`;
+
+            for (let i = 0; i < headers.length; i++) {
+                let val = row[i] || '';
+                let cellClass = '';
+                if (i === stockIdx) {
+                    cellClass = 'stock-name';
+                    val = escapeHtml(val);
+                } 
+                else if (i === gainIdx && val) {
+                    // GAIN column: display as absolute number without % symbol
+                    let num = parseFloat(val);
+                    if (!isNaN(num)) {
+                        let cls = num >= 0 ? 'positive-number' : 'negative-number';
+                        let sign = (num > 0) ? '+' : '';
+                        val = `<span class="${cls}">${sign}${num}</span>`;
+                    } else {
+                        val = escapeHtml(val);
+                    }
+                }
+                else {
+                    val = escapeHtml(val);
+                }
+                html += `<td class="${cellClass}">${val}</td>`;
+            }
+            html += `</tr>`;
+        }
+        html += `</tbody></table>`;
+        document.getElementById('tableContainer').innerHTML = html;
+    }
+
+    window.sortTableCol = function(col) {
+        if (sortColumn === col) {
+            sortDirection = sortDirection === "asc" ? "desc" : "asc";
+        } else {
+            sortColumn = col;
+            sortDirection = "asc";
+        }
+        renderDashboard();
+    };
+
+    function shareWhatsApp() {
+        const checkboxes = document.querySelectorAll('.stock-checkbox:checked');
+        if (!checkboxes.length) {
+            alert("Please select at least one stock using checkboxes.");
+            return;
+        }
+        let selectedList = [];
+        checkboxes.forEach(cb => {
+            let name = cb.getAttribute('data-stockname');
+            let signal = cb.getAttribute('data-signal');
+            if (name) selectedList.push(`${name} (${signal})`);
+        });
+        if (selectedList.length === 0) return;
+        let msg = `📊 *Target Live Daily Report*%0A%0A📌 *Selected Stocks:*%0A${selectedList.map(s => `• ${s}`).join('%0A')}%0A%0A📈 GAIN values are absolute numbers.`;
+        window.open(`https://wa.me/?text=${msg}`, '_blank');
+    }
+
+    // Event listeners
+    document.getElementById('uploadCsvBtn').onclick = () => fileInput.click();
+    fileInput.onchange = (e) => {
+        if (e.target.files && e.target.files.length) loadCSV(e.target.files[0]);
+    };
+    document.getElementById('loadLastBtn').onclick = () => loadReportFromStorage();
+    document.getElementById('clearSavedBtn').onclick = () => clearSavedReport();
+    document.getElementById('shareWhatsAppBtn').onclick = shareWhatsApp;
+    document.getElementById('printBtn').onclick = () => window.print();
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            renderDashboard();
+        };
+    });
+    document.getElementById('searchInput').oninput = (e) => {
+        currentSearch = e.target.value;
+        renderDashboard();
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+        loadReportFromStorage();
+    });
+</script>
+</body>
+</html>
